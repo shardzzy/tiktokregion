@@ -3,7 +3,7 @@ from requests import get, post
 from bs4 import BeautifulSoup
 import json
 from time import time
-from datetime import datetime
+from urllib.parse import quote  # Updated import
 
 app = Flask(__name__)
 
@@ -110,28 +110,23 @@ def format_number(num):
     else:
         return str(num)
 
-# Custom filter to format datetime
-@app.template_filter('datetimeformat')
-def datetime_format(value, format='%Y-%m-%d %H:%M:%S'):
-    if isinstance(value, int):  # Assuming value is a Unix timestamp
-        return datetime.utcfromtimestamp(value).strftime(format)
-    return value
-
-# Route to handle TikTok username query
 @app.route('/', methods=['GET', 'POST'])
-def home():
+def index():
     if request.method == 'POST':
-        username = request.form.get('username')
-        data = info(username)
+        username = request.form['username']
+        user_data = info(username)
+        user_data['followers'] = format_number(user_data['follower'])
+        user_data['following'] = format_number(user_data['following'])
+        user_data['likes'] = format_number(user_data['likes'])
 
-        if data['follower'] is None:
-            return render_template('index.html', error=f"Could not find a TikTok account with the username **{username}**.")
+        region = country_flags.get(user_data['region'], user_data['region'])
+        
+        # Check for passkey
+        if check_passkey(username):
+            user_data['passkey'] = 'Yes'
 
-        has_passkey = check_passkey(username)
-        region_flag = country_flags.get(data['region'], '🏳️')
-
-        return render_template('index.html', username=username, data=data, has_passkey=has_passkey, region_flag=region_flag, format_number=format_number)
-
+        return render_template('index.html', user_data=user_data, region=region)
+    
     return render_template('index.html')
 
 if __name__ == '__main__':
