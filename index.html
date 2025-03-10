@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TikTok Region Fetcher</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #ffffff;
+            color: #333;
+            text-align: center;
+            transition: background 0.3s, color 0.3s;
+        }
+        .container {
+            max-width: 400px;
+            margin: 100px auto;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        h1 {
+            font-size: 28px;
+            background: linear-gradient(90deg, #00b4d8, #48cae4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: bold;
+        }
+        p {
+            color: grey;
+        }
+        input {
+            width: 80%;
+            padding: 10px;
+            border: 2px solid #00b4d8;
+            border-radius: 5px;
+            outline: none;
+            background-color: white;
+            color: black;
+            transition: background 0.3s, color 0.3s;
+        }
+        .fetch-btn {
+            display: block;
+            width: 85%;
+            background: linear-gradient(90deg, #00b4d8, #48cae4);
+            color: white;
+            border: none;
+            padding: 15px;
+            margin: 10px auto;
+            font-size: 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: transform 0.2s ease-in-out;
+        }
+        .fetch-btn:hover {
+            transform: scale(1.05);
+        }
+        .dark-mode {
+            background-color: #121212;
+            color: white;
+        }
+        .dark-mode input {
+            background-color: #333;
+            color: white;
+        }
+        .toggle-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 20px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="toggle-btn" onclick="toggleDarkMode()">🌙</div>
+    <div class="container">
+        <h1>TikTok Username Region Fetcher</h1>
+        <p>Enter a TikTok username to discover its region</p>
+        <form method="POST">
+            <input type="text" id="username" name="username" required>
+            <button type="submit" class="fetch-btn">Fetch Region</button>
+        </form>
+        {% if error %}
+            <p style="color:red;">{{ error }}</p>
+        {% endif %}
+        {% if username %}
+            <h2>Information for TikTok user: @{{ username }}</h2>
+            <ul>
+                <li>👤 Nickname: {{ data.nickname if data.nickname else "Unknown" }}</li>
+                <li>👤 Username: @{{ username }}</li>
+                <li>🌍 Region: {{ region_flag }} {{ data.region if data.region else "Unknown" }}</li>
+                <li>🌐 Language: {{ data.language if data.language else "Unknown" }}</li>
+                <li>📜 About: {{ data.bio if data.bio else "No bio available" }}</li>
+                <li>🆔 User ID: {{ data.user_id }}</li>
+                <li>📅 Account Created: {{ data.created | datetimeformat }}</li>
+                <li>🔑 Passkey Available: {{ "Yes" if has_passkey else "No" }}</li>
+            </ul>
+            <h3>📊 Stats:</h3>
+            <ul>
+                <li>👥 Followers: {{ format_number(data.follower) }}</li>
+                <li>👤 Following: {{ format_number(data.following) }}</li>
+                <li>❤️ Hearts: {{ format_number(data.likes) }}</li>
+            </ul>
+        {% endif %}
+    </div>
+    <script>
+        function toggleDarkMode() {
+            document.body.classList.toggle("dark-mode");
+            let toggleBtn = document.querySelector(".toggle-btn");
+            let isDarkMode = document.body.classList.contains("dark-mode");
+            localStorage.setItem("darkMode", isDarkMode);
+            toggleBtn.textContent = isDarkMode ? "☀️" : "🌙";
+        }
+        
+        document.addEventListener("DOMContentLoaded", () => {
+            if (localStorage.getItem("darkMode") === "true") {
+                document.body.classList.add("dark-mode");
+                document.querySelector(".toggle-btn").textContent = "☀️";
+            }
+        });
+    </script>
+</body>
+</html>
